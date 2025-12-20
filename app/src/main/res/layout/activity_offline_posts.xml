@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".FollowListActivity">
+    tools:context=".offline.OfflinePostsActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -19,17 +19,16 @@
             android:layout_height="?attr/actionBarSize">
 
             <ImageView
-                android:id="@+id/back_button_follow"
+                android:id="@+id/back_button_offline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_arrow_back" />
 
             <TextView
-                android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Followers"
+                android:text="Offline Posts"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -38,7 +37,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_follow"
+        android:id="@+id/recycler_view_offline"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"/>

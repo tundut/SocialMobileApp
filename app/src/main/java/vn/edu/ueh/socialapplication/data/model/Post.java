@@ -1,14 +1,8 @@
 package vn.edu.ueh.socialapplication.data.model;
 
-import androidx.annotation.NonNull;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 import java.io.Serializable;
 
-@Entity(tableName = "posts")
 public class Post implements Serializable {
-    @PrimaryKey
-    @NonNull
     private String postId;
     private String userId;
     private String caption;
@@ -19,7 +13,7 @@ public class Post implements Serializable {
         // Default constructor for Firebase
     }
 
-    public Post(@NonNull String postId, String userId, String caption, String imageUrl, long createdAt) {
+    public Post(String postId, String userId, String caption, String imageUrl, long createdAt) {
         this.postId = postId;
         this.userId = userId;
         this.caption = caption;
@@ -27,12 +21,11 @@ public class Post implements Serializable {
         this.createdAt = createdAt;
     }
 
-    @NonNull
     public String getPostId() {
         return postId;
     }
 
-    public void setPostId(@NonNull String postId) {
+    public void setPostId(String postId) {
         this.postId = postId;
     }
 

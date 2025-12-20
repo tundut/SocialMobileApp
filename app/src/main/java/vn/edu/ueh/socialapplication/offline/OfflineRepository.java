@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -11,35 +12,59 @@ import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import vn.edu.ueh.socialapplication.data.model.Post;
 import vn.edu.ueh.socialapplication.utils.NetworkUtils;
 
 public class OfflineRepository {
     private static final String TAG = "OfflineRepository";
-    private final PostDao postDao;
+    private final DatabaseHelper dbHelper;
     private final FirebaseFirestore db;
     private final Context context;
+    private final ExecutorService executorService;
+
+    // We need MutableLiveData to manually update UI since SQLiteOpenHelper doesn't return LiveData directly
+    private final MutableLiveData<List<Post>> allPostsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<Post>> userPostsLiveData = new MutableLiveData<>();
 
     public OfflineRepository(Context context) {
         this.context = context;
-        AppDatabase database = AppDatabase.getDatabase(context);
-        this.postDao = database.postDao();
+        this.dbHelper = new DatabaseHelper(context);
         this.db = FirebaseFirestore.getInstance();
+        this.executorService = Executors.newFixedThreadPool(4);
+        
+        // Load initial data
+        loadAllPostsFromLocal();
     }
 
     public LiveData<List<Post>> getAllPosts() {
-        // Return local data as the single source of truth for UI
-        return postDao.getAllPosts();
+        return allPostsLiveData;
     }
 
     public LiveData<List<Post>> getUserPosts(String userId) {
-        return postDao.getPostsByUserId(userId);
+        // Initial load for a specific user
+        loadUserPostsFromLocal(userId);
+        return userPostsLiveData;
+    }
+
+    private void loadAllPostsFromLocal() {
+        executorService.execute(() -> {
+            List<Post> posts = dbHelper.getAllPosts();
+            allPostsLiveData.postValue(posts);
+        });
+    }
+
+    private void loadUserPostsFromLocal(String userId) {
+        executorService.execute(() -> {
+            List<Post> posts = dbHelper.getPostsByUserId(userId);
+            userPostsLiveData.postValue(posts);
+        });
     }
 
     public void refreshPosts() {
         if (NetworkUtils.isNetworkAvailable(context)) {
-            // Fetch from Firebase and update SQLite
             db.collection("posts")
                     .orderBy("createdAt", Query.Direction.DESCENDING)
                     .limit(20)
@@ -49,7 +74,6 @@ public class OfflineRepository {
                         for (DocumentSnapshot doc : queryDocumentSnapshots) {
                             Post post = doc.toObject(Post.class);
                             if (post != null) {
-                                // Ensure ID is set if not in the object itself
                                 if (post.getPostId() == null || post.getPostId().isEmpty()) {
                                     post.setPostId(doc.getId());
                                 }
@@ -57,21 +81,19 @@ public class OfflineRepository {
                             }
                         }
                         
-                        // Update SQLite in a background thread
-                        AppDatabase.databaseWriteExecutor.execute(() -> {
-                            // Optionally clear old posts or just upsert
-                            // postDao.clearAllPosts(); // decided not to clear to keep history? or clear to sync exact feed
-                            // For offline cache of "viewed", maybe we just insert/update
-                            postDao.insertPosts(posts);
+                        executorService.execute(() -> {
+                            dbHelper.insertPosts(posts);
+                            // After inserting, reload from DB to update UI
+                            loadAllPostsFromLocal();
                         });
                     })
                     .addOnFailureListener(e -> Log.e(TAG, "Error fetching posts", e));
         } else {
             Log.d(TAG, "No network, using offline data");
+            loadAllPostsFromLocal();
         }
     }
     
-    // Method to load specific user's posts (e.g. for Profile) and cache them
     public void fetchUserPosts(String userId) {
         if (NetworkUtils.isNetworkAvailable(context)) {
             db.collection("posts")
@@ -87,11 +109,15 @@ public class OfflineRepository {
                                 posts.add(post);
                             }
                         }
-                        AppDatabase.databaseWriteExecutor.execute(() -> {
-                            postDao.insertPosts(posts);
+                        executorService.execute(() -> {
+                            dbHelper.insertPosts(posts);
+                            // After inserting, reload specific user posts
+                            loadUserPostsFromLocal(userId);
                         });
                     })
                     .addOnFailureListener(e -> Log.e(TAG, "Error fetching user posts", e));
+        } else {
+            loadUserPostsFromLocal(userId);
         }
     }
 }
