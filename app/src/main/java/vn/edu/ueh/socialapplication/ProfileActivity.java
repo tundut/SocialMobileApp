@@ -77,6 +77,7 @@ public class ProfileActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("SocialApplication"); // Set title to SocialApplication
         toolbar.setNavigationOnClickListener(v -> finish());
 
         imageProfile = findViewById(R.id.image_profile);
@@ -91,6 +92,9 @@ public class ProfileActivity extends AppCompatActivity {
         toolbarTitle = findViewById(R.id.toolbar_title);
         followersLayout = findViewById(R.id.followers_layout);
         followingLayout = findViewById(R.id.following_layout);
+
+        // Hide the custom username title to show only "SocialApplication"
+        toolbarTitle.setVisibility(View.GONE);
 
         // Hide options menu if not current user (or implement reporting/blocking later)
         if (!profileId.equals(firebaseUser.getUid())) {
@@ -122,7 +126,7 @@ public class ProfileActivity extends AppCompatActivity {
                     ImageUtils.loadImage(user.getAvatar(), imageProfile);
                 }
                 fullname.setText(user.getUserName());
-                toolbarTitle.setText(user.getUserId()); // Handle/username in toolbar
+                // toolbarTitle.setText(user.getUserId()); // Removed to keep only SocialApplication
                 bio.setText(user.getBio());
             }
         });
