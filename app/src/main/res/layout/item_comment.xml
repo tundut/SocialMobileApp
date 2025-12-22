@@ -57,43 +57,4 @@
         app:layout_constraintStart_toStartOf="@id/tvUsername"
         app:layout_constraintTop_toBottomOf="@id/tvUsername" />
 
-    <ImageView
-        android:id="@+id/btnLike"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginTop="8dp"
-        android:src="@drawable/ic_unliked"
-        app:layout_constraintStart_toStartOf="@id/tvComment"
-        app:layout_constraintTop_toBottomOf="@id/tvComment" />
-
-    <TextView
-        android:id="@+id/tvLikeCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="1"
-        app:layout_constraintStart_toEndOf="@+id/btnLike"
-        app:layout_constraintTop_toTopOf="@+id/btnLike"
-        app:layout_constraintBottom_toBottomOf="@+id/btnLike"/>
-
-    <ImageView
-        android:id="@+id/btnReply"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="16dp"
-        android:src="@drawable/ic_comment"
-        app:layout_constraintStart_toEndOf="@+id/tvLikeCount"
-        app:layout_constraintTop_toTopOf="@+id/btnLike"
-        app:layout_constraintBottom_toBottomOf="@+id/btnLike"/>
-
-     <TextView
-        android:id="@+id/tvReplyCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="1"
-        app:layout_constraintStart_toEndOf="@+id/btnReply"
-        app:layout_constraintTop_toTopOf="@+id/btnReply"
-        app:layout_constraintBottom_toBottomOf="@+id/btnReply"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
